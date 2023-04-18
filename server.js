@@ -2,12 +2,11 @@ const http = require("http")
 const Koa = require("koa")
 const koaBody = require("koa-body")
 const cors = require("@koa/cors")
-const mailDb = require("./db")
 const Router = require("koa-router")
 const koaStatic = require("koa-static")
-const uuid = require("uuid")
 const path = require("path")
 const fs = require("fs")
+const slow = require("koa-slow")
 const newsDb = require("./db")
 
 const app = new Koa()
@@ -25,10 +24,23 @@ app.use(
 	})
 )
 
+app.use(
+	slow({
+		delay: 1500
+	})
+)
+
 const router = new Router()
 
 router.get("/news", async ctx => {
-	ctx.response.body = JSON.stringify(newsDb.news)
+	const random = Math.random()
+
+	if (random > 0.5) {
+		ctx.response.body = JSON.stringify(newsDb.news)
+		return
+	}
+
+	ctx.response.body = new Error("нет плодклюения")
 })
 
 router.get("/", async ctx => {
